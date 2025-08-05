@@ -14,7 +14,7 @@ services:
     container_name: nodejs
     image: node:22-bullseye
     ports:
-      - "1985:1985"
+      - "5062:5062"
     volumes:
       - ./src/node:/app
       - ./work:/work
@@ -49,7 +49,7 @@ services:
     ports:
       - 8888:80
     volumes:
-      - ./pgadmin:/var/lib/pgadmin
+      - pgadmin:/var/lib/pgadmin
       - ./work:/work
     environment:
       PGADMIN_DEFAULT_EMAIL: "${PGADMIN_DEFAULT_EMAIL}"
@@ -58,3 +58,6 @@ services:
       - db
     env_file:
       - .env
+
+volumes:
+  pgadmin:
