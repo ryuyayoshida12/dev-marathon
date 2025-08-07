@@ -26,7 +26,7 @@
 
     <script type="module">
       // ExpressサーバのAPIエンドポイントのURL
-      import config from "./config.js";
+      import config from "../config.js";
 
       fetch(`${config.apiUrl}/customers`)
         .then((response) => {
@@ -42,7 +42,7 @@
             const cell2 = row.insertCell(1);
             const cell3 = row.insertCell(2);
             cell1.textContent = index + 1;
-            cell2.textContent = customer.companyname;
+            cell2.textContent = customer.company_name;
             cell3.textContent = customer.contact;
           });
         })

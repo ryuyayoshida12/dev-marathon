@@ -20,6 +20,8 @@ services:
       - ./work:/work
     working_dir: /app
     tty: true # 開発時のみ有効
+    env_file:
+      - .env
 
   db:
     container_name: postgres
@@ -32,7 +34,7 @@ services:
       timeout: 5s
       retries: 3
     volumes:
-      - ./db:/var/lib/postgresql/data
+      - db:/var/lib/postgresql/data
       - ./work:/work
     working_dir: /work
     environment:
@@ -61,3 +63,4 @@ services:
 
 volumes:
   pgadmin:
+  db:
