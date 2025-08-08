@@ -10,9 +10,109 @@
 <body>
     <div class="container mt-5">
         <!-- ここにHTMLを書く -->
+
+        <h2 class="mb-4">確認画面</h2>
+        <form id="customer-form">
+            <div class="form-group">
+                <input type="hidden" class="form-control" id="companyName" name="companyName" required>
+                <input type="hidden" class="form-control" id="industry" name="industry" required>
+                <input type="hidden" class="form-control" id="contact" name="contact" required>
+                <input type="hidden" class="form-control" id="location" name="location" required>
+
+                <table border="1" class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>項目</th>
+                        <th>入力内容</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <th>会社名</th>
+                        <td id="print-company"></td>
+                    </tr>
+                    <tr>
+                        <th>業種</th>
+                        <td id="print-industry"></td>
+                    </tr>
+                    <tr>
+                        <th>連絡先</th>
+                        <td id="print-contact"></td>
+                    </tr>
+                    <tr>
+                        <th>所在地</th>
+                        <td id="print-location"></td>
+                    </tr>
+                    </table>
+
+                <button type="submit" class="btn btn-primary" style="font-size: 15px;">送信</button>
+            </div>
+        </form>
     </div>
+
+    <style>
+        table{
+            
+        }
+        th, td{
+            padding: 12px 100px;
+            text-align: center;       /* 横中央 */
+            vertical-align: middle;   /* 縦中央 */
+        }
+
+    </style>
     <script type="module">
-        <!-- ここにJSを書く -->
+        import config from '../config.js';
+
+        fetch(`${config.apiUrl}/add-confirm`,{
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Accept': 'application/json'
+            },
+        }).then(response => response.json())
+          .then(jsonData => {
+            const {companyName, industry, contact, location} = jsonData.customer;
+
+            document.getElementById('companyName').value = companyName;
+            document.getElementById('industry').value = industry;
+            document.getElementById('contact').value = contact;
+            document.getElementById('location').value = location;
+
+            document.getElementById('print-company').textContent = companyName;
+            document.getElementById('print-industry').textContent = industry;
+            document.getElementById('print-contact').textContent = contact;
+            document.getElementById('print-location').textContent = location;
+          })
+
+
+        document.getElementById('customer-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const form = document.getElementById('customer-form');
+            const formData = new FormData(form);
+
+            //formDataをjavascriptオブジェクトに変換
+            const data = Object.fromEntries(formData.entries());
+
+            fetch(config.apiUrl + '/add-customer', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            }).then(response => response.json())
+              .then(data => {
+                if(data.success) {
+                    alert('顧客情報が正常に保存されました。');
+                    // フォームをリセット
+                    document.getElementById('customer-form').reset();
+                } else {
+                    alert('保存に失敗しました。');
+                }
+              })
+              .catch(error => console.error('Error:', error));
+        });
     </script>
     <!-- BootstrapのJavaScriptの読み込み -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
