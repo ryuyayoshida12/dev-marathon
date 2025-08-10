@@ -28,6 +28,9 @@
       // ExpressサーバのAPIエンドポイントのURL
       import config from "../config.js";
 
+
+      //-------------- 初期画面構築 -------------
+      // '/customers'エンドポイントで顧客データを取得しテーブル生成
       fetch(`${config.apiUrl}/customers`)
         .then((response) => {
           console.log(response); // ここでレスポンスオブジェクトをログに出力
@@ -37,16 +40,42 @@
           console.log(data); // ここで解析されたデータをログに出力
           const list = document.getElementById("customer-list");
           data.forEach((customer, index) => {
-            const row = list.insertRow();
-            const cell1 = row.insertCell(0);
-            const cell2 = row.insertCell(1);
+            const row = list.insertRow(); //列の追加
+            const cell1 = row.insertCell(0); //セルの追加
+            const cell2 = row.insertCell(1); 
             const cell3 = row.insertCell(2);
-            cell1.textContent = index + 1;
-            cell2.textContent = customer.company_name;
-            cell3.textContent = customer.contact;
+            cell1.textContent = index + 1; //左のセルに付番
+            
+            const link = document.createElement("a"); //a要素を生成
+            link.textContent = customer.company_name; //テキストに会社名
+            link.href = `detail.html?id=${customer.customer_id}`; //詳細画面へ(右クリック用)
+            link.dataset.customer_id = customer.customer_id; //customer_idを付与（練習用）
+            cell2.appendChild(link); //linkをcell2の子要素に
+            // cell2.innerHTML = `
+            //   <a href="detail.html" 
+            //     data-customer_id="${customer.customer_id}">
+            //     ${customer.company_name}</a>`;
+            cell3.textContent = customer.contact;//テキストに電話番号
           });
         })
         .catch((error) => console.error(error));
+
+        
+      //-------------顧客名クリック時(練習用)-------------
+      document.getElementById("customer-list").addEventListener("click",function(e){
+        if(e.target.tagName === "A"){
+          e.preventDefault();
+
+          //該当顧客のcustomer_idを取得
+          const id = e.target.dataset.customer_id;
+
+          // 空白・記号・日本語にも対応(encodeURIComponent())
+          const param = new URLSearchParams({ id: id });
+
+          //詳細画面へ遷移
+          window.location.href = `detail.html?${param.toString()}`;
+        }
+      });
     </script>
 
     <!-- BootstrapのJavaScriptと依存関係のリンク -->

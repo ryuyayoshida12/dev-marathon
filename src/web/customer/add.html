@@ -38,7 +38,7 @@
     <script type="module">
         import config from '../config.js';    
 
-        //送信ボタン押下時の動作
+        //------------- 送信ボタン押下時 -------------
         document.getElementById('customer-form').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -62,7 +62,7 @@
                     // フォームをリセット
                     document.getElementById('customer-form').reset();
                     // 確認画面へ
-                    window.location.href = 'add-confirm.html'
+                    window.location.href = 'add-confirm.html';
                 } else {
                     alert('保存に失敗しました。');
                 }

@@ -38,6 +38,7 @@ app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
+//--- 全顧客を取得するエンドポイント ---
 app.get("/customers", async (req, res) => {
   try {
     const customerData = await pool.query("SELECT * FROM customers");
@@ -48,31 +49,48 @@ app.get("/customers", async (req, res) => {
   }
 });
 
+app.get('/test', (req, res) => {
+  res.send('Test OK');
+});
 
+//--- customer_idから顧客情報を取得するエンドポイント ---
+app.get('/customer/:customerId', async (req, res) => {
 
+  //パラメータからcustomerId取得
+  const id = req.params.customerId; 
 
-//確認画面へのデータ受け渡し用エンドポイント
+  //idから顧客を取得するSQL文作成
+  const sql = "SELECT * FROM customers WHERE customer_id = $1";
+  const value = [id];
+  try {
+
+    //DBからデータ取得
+    const customerData = await pool.query(sql, value);
+
+    //jsonでレスポンス
+    res.json(customerData.rows[0] || {} );
+  } catch (err) {
+    console.error(err);
+    res.send("Error " + err);
+  }
+});
+
+//--- 確認画面へのデータ受け渡し用エンドポイント ---
 app.post('/add-confirm', (req, res) => {
   req.session.customer = req.body;   // データをセッションに保存
-  // req.session.save(err => {
-  //   if (err) {
-  //     return res.status(500).json({ error: 'Session save failed' });
-  //   }
-  // });
-  console.log(req.session.customer);
+  // console.log(req.session.customer);
   res.json({ success: true });
   // res.redirect('/add-confirm'); // 確認画面へリダイレクト
 });
 
-//確認画面へセッション情報を渡す
+//--- 確認画面へセッション情報を渡すエンドポイント ---
 app.get('/add-confirm', (req, res) => {
-  // res.json({ customer: req.session });
-  console.log(req.session.customer);
-  const sessionCustomer = req.session.customer || {};
-  res.json({ customer: sessionCustomer });
+  // console.log(req.session.customer);
+  const sessionData = req.session.customer || {};
+  res.json({ customer: sessionData });
 });
 
-//顧客情報をDBに登録するエンドポイント
+//--- 顧客情報をDBに登録するエンドポイント ---
 app.post("/add-customer", async (req, res) => {
   try {
     const { companyName, industry, contact, location } = req.body;
