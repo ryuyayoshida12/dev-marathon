@@ -14,7 +14,7 @@
         <h2 class="mb-4">確認画面</h2>
         <form id="customer-form">
             <div class="form-group">
-                <input type="hidden" class="form-control" id="companyName" name="companyName" required>
+                <input type="hidden" class="form-control" id="company_name" name="company_name" required>
                 <input type="hidden" class="form-control" id="industry" name="industry" required>
                 <input type="hidden" class="form-control" id="contact" name="contact" required>
                 <input type="hidden" class="form-control" id="location" name="location" required>
@@ -63,8 +63,8 @@
     
 
         //------------- 初期画面構築 ---------------
-        //'/add-confirm'エンドポイントで入力内容を取得し出力
-        fetch(`${config.apiUrl}/add-confirm`,{
+        //'/get-session'エンドポイントで入力内容を取得し出力
+        fetch(`${config.apiUrl}/get-session`,{
             method: 'GET',
             //既存のセッションの継続
             credentials: 'include',
@@ -73,16 +73,16 @@
             },
         }).then(response => response.json())
           .then(jsonData => {
-            const {companyName, industry, contact, location} = jsonData.customer;
+            const {company_name, industry, contact, location} = jsonData.customer;
 
             //hiddenに出力
-            document.getElementById('companyName').value = companyName;
+            document.getElementById('company_name').value = company_name;
             document.getElementById('industry').value = industry;
             document.getElementById('contact').value = contact;
             document.getElementById('location').value = location;
 
             //テーブル内に出力
-            document.getElementById('print-company').textContent = companyName;
+            document.getElementById('print-company').textContent = company_name;
             document.getElementById('print-industry').textContent = industry;
             document.getElementById('print-contact').textContent = contact;
             document.getElementById('print-location').textContent = location;
@@ -123,8 +123,10 @@
                     alert('顧客情報が正常に保存されました。');
                     // フォームをリセット
                     document.getElementById('customer-form').reset();
+                    window.location.href = "list.html";
                 } else {
                     alert('保存に失敗しました。');
+                    window.location.href = "add.html?re-registration=true";
                 }
               })
               .catch(error => console.error('Error:', error));

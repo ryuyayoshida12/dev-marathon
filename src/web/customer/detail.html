@@ -12,7 +12,7 @@
             <!-- ここにHTMLを書く -->
 
         <h2 class="mb-4">詳細情報画面</h2>
-        <form id="customer-form">
+        <form id="customer-detail">
             <div class="form-group">
                 <table class="table table-striped">
                     <thead class="thead-dark">
@@ -44,17 +44,22 @@
                             <td id="location"></td>
                         </tr>
                         <tr>
-                            <th>登録</th>
+                            <th>登録日</th>
                             <td id="created_date"></td>
                         </tr>
                                                 <tr>
-                            <th>最終更新</th>
+                            <th>最終更新日</th>
                             <td id="updated_date"></td>
                         </tr>
                     </tbody>
-                    </table>
-
-                    <!-- <button type="submit" class="btn btn-primary">登録</button> -->
+                </table>
+                <div style="text-align: right;">
+                    <button type="button" class="btn btn-info" id="update">編集</button>
+                    <button type="button" class="btn btn-danger" id="delete">削除</button>
+                </div><br>
+                <div style="text-align: right;">
+                    <a href = "http://localhost/customer/list.html" >顧客一覧はこちら</a>
+                </div>
             </div>
         </form>
     </div>
@@ -71,12 +76,12 @@
     <script type="module">
         import config from '../config.js';
 
-        //------------- 初期画面構築 --------------
-        const queryParam = window.location.search; //urlからクエリパラメータ取得
-        const UrlParam = new URLSearchParams(queryParam); //URLsearchParams形式に
-        const id = UrlParam.get("id"); //'id'の値を取得
+        const queryParam = window.location.search; //urlからクエリパラメータ取得(?id=〇〇)
+        const UrlParam = new URLSearchParams(queryParam); //URLsearchParams形式に(id=〇〇)
+        const id = UrlParam.get("id"); //'id'の値を取得(〇〇)
 
-        // '/customer/{customerId}'へリクエスト
+        //------------- 初期画面構築 --------------
+        // '/customer/{customerId}'にリクエスト
         fetch(`${config.apiUrl}/customer/${id}`, {
             method: "GET",
             headers: {
@@ -113,8 +118,38 @@
           })
           .catch((error) => console.error(error));
 
-        
+        //----------- 編集ボタン押下時 ------------
+        document.getElementById("update").addEventListener("click", function(e) {
+            e.preventDefault();
 
+            window.location.href = `update.html${queryParam}`;
+        })
+
+        //----------- 削除ボタン押下時 ------------
+        document.getElementById("delete").addEventListener("click", function(e) {
+            e.preventDefault();
+
+            if(confirm("本当に削除しますか？")){
+                fetch(`${config.apiUrl}/customers/${id}`, {
+                    method: "delete",
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success){
+                        alert("削除が完了しました。");
+                        window.location.href = "list.html";
+                    }else{
+                        alert("削除に失敗しました。");
+                    }
+                })
+                .catch((error) => console.error(error));
+            }else{
+                alert("中止しました。");
+            }
+            
+            
+        })
+        
     </script>
     
     <!-- BootstrapのJavaScriptと依存関係のリンク -->

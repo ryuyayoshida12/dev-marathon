@@ -61,7 +61,7 @@
         .catch((error) => console.error(error));
 
         
-      //-------------顧客名クリック時(練習用)-------------
+      //------------- 顧客名クリック時(練習用) -------------
       document.getElementById("customer-list").addEventListener("click",function(e){
         if(e.target.tagName === "A"){
           e.preventDefault();
@@ -69,7 +69,7 @@
           //該当顧客のcustomer_idを取得
           const id = e.target.dataset.customer_id;
 
-          // 空白・記号・日本語にも対応(encodeURIComponent())
+          //空白・記号・日本語にも対応(encodeURIComponent())
           const param = new URLSearchParams({ id: id });
 
           //詳細画面へ遷移

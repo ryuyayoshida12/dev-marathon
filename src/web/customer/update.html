@@ -9,10 +9,209 @@
 </head>
 <body>
     <div class="container mt-5">
-        <!-- ここにHTMLを書く -->
+            <!-- ここにHTMLを書く -->
+        <h2 class="mb-4">顧客情報編集</h2>
+        <form id="customer-update">
+            <div class="form-group">
+                <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">項目</th>
+                            <th scope="col">顧客情報</th> 
+                            <th scope="col">変更</th>  
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- javascriptでデータ差し込み -->
+                        <tr>
+                            <th>id</th>
+                            <td id="customer_id"></td>
+                            <td>変更不可</td>
+                        </tr>
+                        <tr class="editable">
+                            <th>会社名</th>
+                            <td id="company"></td>
+                            <td>
+                                <button type="button" class="btn btn-warning edit-btn">変更</button>
+                            </td>
+                        </tr>
+                        <tr class="editable">
+                            <th>業界</th>
+                            <td id="industry"></td>
+                            <td>
+                                <button type="button" class="btn btn-warning edit-btn">変更</button>
+                            </td>
+                        </tr>
+                        <tr class="editable">
+                            <th>電話番号</th>
+                            <td id="contact"></td>
+                            <td>
+                                <button type="button" class="btn btn-warning edit-btn">変更</button>
+                            </td>
+                        </tr>
+                        <tr class="editable">
+                            <th>所在地</th>
+                            <td id="location"></td>
+                            <td>
+                                <button type="button" class="btn btn-warning edit-btn">変更</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>登録日</th>
+                            <td id="created_date"></td>
+                            <td>変更不可</td>
+                        </tr>
+                        <tr>
+                            <th>最終更新日</th>
+                            <td id="updated_date"></td>
+                            <td>変更不可</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="text-align: right;">
+                    <button type="button" class="btn btn-primary" id="to-confirm">確認画面へ</button>
+                </div>
+            </div>
+        </form>
     </div>
+
+    <!-- CSS -->
+    <style>
+        table{
+            width: 100%;
+        }
+        th, td{
+            width: 33.33%;
+            text-align: center;       /* 横中央 */
+            vertical-align: middle;   /* 縦中央 */
+        }
+
+    </style>  
+
+    <!-- javascript -->
     <script type="module">
-        <!-- ここにJSを書く -->
+        import config from '../config.js';
+
+        const queryParam = window.location.search; //urlからクエリパラメータ取得(?id=〇〇)
+        const UrlParam = new URLSearchParams(queryParam); //URLsearchParams形式に(id=〇〇)
+        const id = UrlParam.get("id"); //'id'の値を取得(〇〇)
+
+        //------------- 初期画面構築 --------------
+        // '/customer/{customerId}'にリクエスト
+        fetch(`${config.apiUrl}/customer/${id}`, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        }).then(response => response.json())
+          .then(jsonData => {
+
+            //一旦変数に代入
+            const {
+                customer_id,
+                company_name, 
+                industry, 
+                contact, 
+                location, 
+                created_date, 
+                updated_date
+            }   = jsonData;
+
+            //htmlにデータ差し込み
+            document.getElementById("customer_id").textContent = customer_id;
+            document.getElementById("company").textContent = company_name;
+            document.getElementById("industry").textContent = industry;
+            document.getElementById("contact").textContent = contact;
+            document.getElementById("location").textContent = location;
+
+            //日付関係は整形してから差し込み
+            [
+                {id: "created_date", date: created_date},
+                {id: "updated_date", date: updated_date}
+            ].forEach(({id, date}) => {
+                document.getElementById(id).textContent = date.slice(0, 10);
+            });
+          })
+          .catch((error) => console.error(error));
+
+        //------------ 変更・閉じるボタン押下時 ------------
+        document.querySelector(".table").addEventListener("click", function(e) {
+            if(e.target.classList.contains("edit-btn")){
+
+                e.preventDefault();
+
+                const cell = e.target.closest("td");
+                const leftCell = cell.previousElementSibling;
+                const currentValue = leftCell.innerText;
+
+                cell.innerHTML = `
+                    <button type="button" class="btn btn-info form-close">閉じる</button>
+                    `;
+                leftCell.innerHTML = `
+                    <input type="text" class="edit-form" value="${currentValue}""></input>
+                    `;
+                
+            }else if(e.target.classList.contains("form-close")){
+
+                e.preventDefault();
+
+                const cell = e.target.closest("td");
+                const leftCell = cell.previousElementSibling;
+                const newValue = leftCell.querySelector(".edit-form").value;
+
+                cell.innerHTML = `
+                    <button type="button" class="btn btn-warning edit-btn">変更</button>
+                    `;
+                leftCell.innerText = newValue;
+            }
+        });
+
+        //----------- 確認画面へボタン押下時 ------------
+        document.getElementById("to-confirm").addEventListener("click", function(e) {
+            e.preventDefault();
+
+            const rows = document.querySelectorAll(".editable");
+            const areAllFormsClosed = Array.from(rows).every(row => 
+                row.querySelector("button.form-close") == null
+            );
+
+            if(!areAllFormsClosed){
+                alert("入力フォームはすべて閉じてください。");
+                return;
+            }
+            const companyCell = document.getElementById("company");
+            const industryCell = document.getElementById("industry");
+            const contactCell = document.getElementById("contact");
+            const locationCell = document.getElementById("location");
+
+            const data = {
+                "company_name": companyCell.textContent,
+                "industry": industryCell.textContent,
+                "contact": contactCell.textContent,
+                "location": locationCell.textContent
+            };
+
+            fetch(`${config.apiUrl}/save-session`, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json " 
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success){
+                    window.location.href = `update-confirm.html${queryParam}`;
+                }else{
+                    alert("送信に失敗しました。");
+                }
+            })
+        })
+
+
+
+
     </script>
     <!-- BootstrapのJavaScriptの読み込み -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>

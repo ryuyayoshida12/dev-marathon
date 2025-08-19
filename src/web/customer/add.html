@@ -12,8 +12,8 @@
         <h2 class="mb-4">顧客情報を入力してください</h2>
         <form id="customer-form">
             <div class="form-group">
-                <label for="companyName">会社名:</label>
-                <input type="text" class="form-control" id="companyName" name="companyName" required>
+                <label for="company_name">会社名:</label>
+                <input type="text" class="form-control" id="company_name" name="company_name" required>
             </div>
             <div class="form-group">
                 <label for="industry">業種:</label>
@@ -38,6 +38,28 @@
     <script type="module">
         import config from '../config.js';    
 
+        //------------- 登録失敗時の画面遷移 ------------
+        const queryParam = window.location.search;
+        if(queryParam === "?re-registration=true"){
+        
+            fetch(`${config.apiUrl}/get-session`,{
+                method: 'GET',
+                //既存のセッションの継続
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json'
+                },
+            }).then(response => response.json())
+            .then(jsonData => {
+                const {company_name = "", industry = "", contact = "", location= ""} = jsonData.customer ?? {};
+
+                //入力内容を出力
+                document.getElementById('company_name').value = company_name;
+                document.getElementById('industry').value = industry;
+                document.getElementById('contact').value = contact;
+                document.getElementById('location').value = location;
+            });
+        }
         //------------- 送信ボタン押下時 -------------
         document.getElementById('customer-form').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -48,7 +70,7 @@
             //formDataをjavascriptオブジェクトに変換
             const data = Object.fromEntries(formData.entries());
 
-            fetch(`${config.apiUrl}/add-confirm`, {
+            fetch(`${config.apiUrl}/save-session`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {

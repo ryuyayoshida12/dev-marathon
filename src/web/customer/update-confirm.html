@@ -3,16 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>案件情報入力</title>
+    <title>変更内容確認</title>
     <!-- Bootstrap CSSの読み込み -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container mt-5">
-        <!-- ここにHTMLを書く -->
+            <!-- ここにHTMLを書く -->
+        <h2 class="mb-4">変更内容確認</h2>
+        <form id="customer-update">
+            <div class="form-group">
+                <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">項目</th>
+                            <th scope="col">既存情報</th> 
+                            <th scope="col">変更後の情報</th>  
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- javascriptでデータ差し込み -->
+                        <tr id="customer_id">
+                            <th>id</th>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr id="company_name">
+                            <th>会社名</th>
+                            <td></td>
+                            <td class="editable"></td>
+                        </tr>
+                        <tr id="industry">
+                            <th>業界</th>
+                            <td></td>
+                            <td class="editable"></td>
+                        </tr>
+                        <tr id="contact">
+                            <th>電話番号</th>
+                            <td></td>
+                            <td class="editable"></td>
+                        </tr>
+                        <tr id="location">
+                            <th>所在地</th>
+                            <td></td>
+                            <td class="editable"></td>
+                        </tr>
+                        <tr id="created_date">
+                            <th>登録日</th>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr id="updated_date">
+                            <th>最終更新日</th>
+                            <td></td>
+                            <td id="auto-update"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="text-align: right;">
+                    <button type="button" class="btn btn-primary" id="to-update">この内容で更新する</button>
+                </div>
+            </div>
+        </form>
     </div>
+
+    <!-- CSS -->
+    <style>
+        table{
+            width: 100%;
+        }
+        th, td{
+            width: 33.33%;
+            text-align: center;       /* 横中央 */
+            vertical-align: middle;   /* 縦中央 */
+        }
+
+    </style>  
+
+    <!-- javascript -->
     <script type="module">
-        <!-- ここにJSを書く -->
+        import config from '../config.js';
+
+        const queryParam = window.location.search; //urlからクエリパラメータ取得(?id=〇〇)
+        const UrlParam = new URLSearchParams(queryParam); //URLsearchParams形式に(id=〇〇)
+        const id = UrlParam.get("id"); //'id'の値を取得(〇〇)
+
+        //------------- 初期画面構築 --------------
+        //--- 変更前の情報を取得、出力 ---
+        await fetch(`${config.apiUrl}/customer/${id}`, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        }).then(response => response.json())
+          .then(jsonData => {
+
+            //一旦変数に代入
+            const {
+                customer_id,
+                company_name, 
+                industry, 
+                contact, 
+                location, 
+                created_date, 
+                updated_date
+            }   = jsonData;
+
+            //htmlにデータ差し込み
+            [
+                {id: "customer_id", value: customer_id},
+                {id: "company_name", value: company_name},
+                {id: "industry", value: industry},
+                {id: "contact", value: contact},
+                {id: "location", value: location}
+            ].forEach(({id, value}) => {
+                $(`#${id}`).children("td").text(value);               
+            });
+
+            //日付関係は整形してから差し込み
+            [
+                {id: "created_date", date: created_date},
+                {id: "updated_date", date: updated_date}
+            ].forEach(({id, date}) => {
+                const printDate = date.slice(0, 10);
+                $(`#${id}`).children("td").text(printDate);
+            });
+          })
+          .catch((error) => console.error(error));
+
+        //--- 変更後の情報を取得、出力 ---
+        await fetch(`${config.apiUrl}/get-session`, {
+            method: "GET",
+            credentials: "include",
+            headers: {
+                "Accept": "application/json, text/html"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+
+            const customer = data.customer;
+            Object.entries(customer).forEach(([key, value]) => {
+                const cell = document.getElementById(key).querySelector(".editable");
+                if(cell.textContent !== value){
+                    cell.textContent = value;
+                    cell.classList.add("table-primary", "table-bordered", "border-primary");
+                }
+
+            });
+
+            const today = new Date().toISOString().slice(0, 10);
+            document.getElementById("auto-update").textContent = today;          
+        })
+
+        //---------- 「この内容で更新する」ボタン -----------
+        document.getElementById("to-update").addEventListener("click", function(e) {
+            e.preventDefault();
+
+            const elements = document.querySelectorAll(".editable");
+            const data = Array.from(elements).map(el => el.textContent);
+
+            const body = {
+                "company_name": data[0],
+                "industry": data[1],
+                "contact": data[2],
+                "location": data[3]
+            };
+            console.log(body);
+
+            fetch(`${config.apiUrl}/update-customer/${id}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success){
+                    alert("更新が完了しました。");
+                    window.location.href = `detail.html${queryParam}`;
+                }else{
+                    alert("更新が失敗しました。");
+                }
+            })
+        })
+
+
+
     </script>
     <!-- BootstrapのJavaScriptの読み込み -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>

@@ -15,7 +15,7 @@ app.use(cors({
 //セッションの設定
 const session = require("express-session");
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.POSTGRES_USER,
   resave: true,
   saveUninitialized: true,
   cookie: { secure: false }
@@ -41,7 +41,7 @@ app.listen(port, () => {
 //--- 全顧客を取得するエンドポイント ---
 app.get("/customers", async (req, res) => {
   try {
-    const customerData = await pool.query("SELECT * FROM customers");
+    const customerData = await pool.query("SELECT * FROM customers ORDER BY customer_id asc");
     res.send(customerData.rows);
   } catch (err) {
     console.error(err);
@@ -75,16 +75,19 @@ app.get('/customer/:customerId', async (req, res) => {
   }
 });
 
-//--- 確認画面へのデータ受け渡し用エンドポイント ---
-app.post('/add-confirm', (req, res) => {
+//--- 顧客情報をセッションに保存するエンドポイント ---
+app.post('/save-session', (req, res) => {
+  try {
   req.session.customer = req.body;   // データをセッションに保存
   // console.log(req.session.customer);
   res.json({ success: true });
-  // res.redirect('/add-confirm'); // 確認画面へリダイレクト
+  }catch(err){
+    res.status(500).json({ error: err.message });
+  }
 });
 
-//--- 確認画面へセッション情報を渡すエンドポイント ---
-app.get('/add-confirm', (req, res) => {
+//--- セッション情報を渡すエンドポイント ---
+app.get('/get-session', (req, res) => {
   // console.log(req.session.customer);
   const sessionData = req.session.customer || {};
   res.json({ customer: sessionData });
@@ -93,16 +96,61 @@ app.get('/add-confirm', (req, res) => {
 //--- 顧客情報をDBに登録するエンドポイント ---
 app.post("/add-customer", async (req, res) => {
   try {
-    const { companyName, industry, contact, location } = req.body;
+    const { company_name, industry, contact, location } = req.body;
     const newCustomer = await pool.query(
       "INSERT INTO customers (company_name, industry, contact, location) VALUES ($1, $2, $3, $4) RETURNING *",
-      [companyName, industry, contact, location]
+      [company_name, industry, contact, location]
     );
     res.json({ success: true, customer: newCustomer.rows[0] });
+    delete req.session.customer;
   } catch (err) {
     console.error(err);
     res.json({ success: false });
   }
+});
+
+//--- 顧客情報を更新するエンドポイント ---
+app.post("/update-customer/:customerId", async (req, res)=> {
+
+  const {company_name, industry, contact, location} = req.body;
+  const id = req.params.customerId;
+  const value = [company_name, industry, contact, location, id];
+
+  //SQL文
+  const sql = `
+      UPDATE customers 
+      SET company_name = $1,
+          industry = $2,
+          contact = $3,
+          location = $4
+      WHERE customer_id = $5;
+      `
+    try {
+      await pool.query(sql, value);
+      res.json({ success: true });
+    } catch (err) {
+    console.error(err);
+    res.json({ success: false });
+  }
+});
+//--- 顧客情報を削除するエンドポイント ---
+app.delete("/customers/:customerId", async (req, res) => {
+
+  //idを取得
+  const id = req.params.customerId;
+
+  //SQL文
+  const sql = "DELETE FROM customers WHERE customer_id = $1";
+  value = [id];
+
+  try {
+    const customerData = await pool.query(sql, value);
+
+    res.json({ success: true });
+    } catch (err) {
+      console.error(err);
+      res.json({ success: false });
+    }
 });
 
 app.use(express.static("public"));
