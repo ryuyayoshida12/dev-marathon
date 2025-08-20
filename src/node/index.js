@@ -7,7 +7,7 @@ app.use(express.json());
 const cors = require('cors');
 app.use(cors({
   // 許可するオリジンを指定
-  origin: 'http://localhost',
+  origin: process.env.CLIENT_ORIGIN,
   // Cookie 等の認証情報を許可 //sessionでデータの受け渡しに必要
   credentials: true,            
 }));
@@ -15,7 +15,7 @@ app.use(cors({
 //セッションの設定
 const session = require("express-session");
 app.use(session({
-  secret: process.env.POSTGRES_USER,
+  secret: process.env.SESSION_SECRET,
   resave: true,
   saveUninitialized: true,
   cookie: { secure: false }
@@ -28,7 +28,7 @@ const port = 5062;
 const { Pool } = require("pg");
 const pool = new Pool({
   user: process.env.POSTGRES_USER, // PostgreSQLのユーザー名に置き換えてください
-  host: "db",
+  host: process.env.POSTGRES_HOST,
   database: process.env.POSTGRES_DB, // PostgreSQLのデータベース名に置き換えてください
   password: process.env.POSTGRES_PASSWORD, // PostgreSQLのパスワードに置き換えてください
   port: 5432,
