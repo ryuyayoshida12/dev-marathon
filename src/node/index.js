@@ -1,5 +1,4 @@
-import dotenv from "dotenv";
-dotenv.config(); // .env があれば読み込む
+require("dotenv").config();
 
 const express = require("express");
 const app = express();
