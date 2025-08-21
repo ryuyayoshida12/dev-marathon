@@ -78,8 +78,15 @@
                 },
                 //dataをjsonに変換しbodyに格納
                 body: JSON.stringify(data)
-            }).then(response => response.json())
-              .then(data => {
+            }).then(async response => {
+                if (!response.ok) {
+                    // サーバーからのエラーレスポンス (例: 404, 500)
+                    const text = await response.text(); // HTMLかもしれないのでtext()で読む
+                    throw new Error(`HTTP ${response.status}: ${text}`);
+                }
+                return response.json(); // JSONが来ることを期待できる場合
+            })
+            .then(data => {
                 if(data.success) {
                     // フォームをリセット
                     document.getElementById('customer-form').reset();
