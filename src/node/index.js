@@ -81,9 +81,9 @@ app.get('/customer/:customerId', async (req, res) => {
 //--- 顧客情報をセッションに保存するエンドポイント ---
 app.post('/save-session', (req, res) => {
   try {
-  req.session.customer = req.body;   // データをセッションに保存
-  // console.log(req.session.customer);
-  res.json({ success: true });
+    req.session.customer = req.body;   // データをセッションに保存
+    // console.log(req.session.customer);
+    res.json({ success: true });
   }catch(err){
     res.status(500).json({ error: err.message });
   }
@@ -92,6 +92,10 @@ app.post('/save-session', (req, res) => {
 //--- セッション情報を渡すエンドポイント ---
 app.get('/get-session', (req, res) => {
   // console.log(req.session.customer);
+  console.log(process.env.POSTGRES_USER);
+  console.log(process.env.POSTGRES_HOST);
+  console.log(process.env.POSTGRES_DB);
+  console.log(process.env.POSTGRES_PASSWORD);
   const sessionData = req.session.customer || {};
   res.json({ customer: sessionData });
 });
