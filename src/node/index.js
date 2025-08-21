@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config(); // .env があれば読み込む
+
 const express = require("express");
 const app = express();
 app.use(express.urlencoded({ extended: true }));
