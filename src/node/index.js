@@ -5,12 +5,15 @@ app.use(express.json());
 
 //クロスオリジンの設定
 const cors = require('cors');
-app.use(cors({
-  // 許可するオリジンを指定
-  origin: process.env.CLIENT_ORIGIN,
-  // Cookie 等の認証情報を許可 //sessionでデータの受け渡しに必要
-  credentials: true,            
-}));
+
+if(process.env.ENVIRONMENT === "local"){
+  app.use(cors({
+    // 許可するオリジンを指定
+    origin: process.env.CLIENT_ORIGIN,
+    // Cookie 等の認証情報を許可 //sessionでデータの受け渡しに必要
+    credentials: true,            
+  }));
+}
 
 //セッションの設定
 const session = require("express-session");
