@@ -22,7 +22,7 @@ jobs:
           SSH_USER: ${{ secrets.DEV_SSH_USER }}
           SSH_KEY: ${{ secrets.DEV_SSHE_SSH_KEY }}
       - run: |
-          ssh ${{ steps.ssh.outputs.SERVER }} bash /app/ryuya_yoshida/deploy.sh ryuya_yoshida "
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEV_SSH_USER }}@${{ secrets.DEV_SSH_HOST }} "
             export SESSION_SECRET='${{ secrets.SESSION_SECRET }}' &&
             export POSTGRES_USER='${{ secrets.POSTGRES_USER }}' &&
             export POSTGRES_DB='${{ secrets.POSTGRES_DB }}' &&
