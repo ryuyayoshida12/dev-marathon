@@ -1,4 +1,5 @@
 require("dotenv").config();
+console.log(process.env.SESSION_SECRET);
 
 const express = require("express");
 const app = express();
