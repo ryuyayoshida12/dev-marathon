@@ -1,5 +1,5 @@
 require("dotenv").config();
-console.log(process.env.SESSION_SECRET);
+// console.log(process.env.SESSION_SECRET);
 
 const express = require("express");
 const app = express();
@@ -55,9 +55,6 @@ app.get("/customers", async (req, res) => {
   }
 });
 
-app.get('/test', (req, res) => {
-  res.send('Test OK');
-});
 
 //--- customer_idから顧客情報を取得するエンドポイント ---
 app.get('/customer/:customerId', async (req, res) => {
@@ -95,10 +92,6 @@ app.post('/save-session', (req, res) => {
 //--- セッション情報を渡すエンドポイント ---
 app.get('/get-session', (req, res) => {
   // console.log(req.session.customer);
-  console.log(process.env.POSTGRES_USER);
-  console.log(process.env.POSTGRES_HOST);
-  console.log(process.env.POSTGRES_DB);
-  console.log(process.env.POSTGRES_PASSWORD);
   const sessionData = req.session.customer || {};
   res.json({ customer: sessionData });
 });
