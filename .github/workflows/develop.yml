@@ -37,13 +37,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      # - name: Setup SSH Agent
-      #   uses: webfactory/ssh-agent@v0.7.0
-      #   with:
-      #     ssh-private-key: ${{ secrets.DEV_SSHE_SSH_KEY }}
-      # - name: Run deploy script
-      #   run: ssh -o StrictHostKeyChecking=no ${{ secrets.DEV_SSH_USER }}@${{ secrets.DEV_SSH_HOST }} bash /app/${{ secrets.DEV_SSH_USER }}/deploy.sh ${{ secrets.DEV_SSH_USER }}
-
       - id: ssh
         uses: invi5H/ssh-action@v1
         with:
@@ -62,6 +55,7 @@ jobs:
             bash deploy.sh ryuya_yoshida
           "
       - name: deploy-production
+        id: prod-ssh
         if: success() #前のステップ(cypressテスト)成功時のみ実行
         uses: invi5H/ssh-action@v1
         with:
@@ -70,7 +64,7 @@ jobs:
           SSH_USER: ${{ secrets.PROD_SSH_USER }}
           SSH_KEY: ${{ secrets.PROD_SSHE_SSH_KEY }}
       - run: |
-          ssh ${{ steps.ssh.outputs.SERVER }} "
+          ssh ${{ steps.prod-ssh.outputs.SERVER }} "
             export SESSION_SECRET='${{ secrets.SESSION_SECRET }}' &&
             export POSTGRES_USER='${{ secrets.POSTGRES_USER }}' &&
             export POSTGRES_DB='${{ secrets.POSTGRES_DB }}' &&
