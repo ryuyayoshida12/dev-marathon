@@ -47,7 +47,7 @@
             cell1.textContent = index + 1; //左のセルに付番
             
             const link = document.createElement("a"); //a要素を生成
-            link.classList.add("link-to-detail")
+            link.classList.add("link-to-detail");
             link.textContent = customer.company_name; //テキストに会社名
             link.href = `detail.html?id=${customer.customer_id}`; //詳細画面へ(右クリック用)
             link.dataset.customer_id = customer.customer_id; //customer_idを付与（練習用）
