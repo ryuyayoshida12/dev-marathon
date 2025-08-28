@@ -57,9 +57,9 @@ jobs:
           "
       - name: Debug PROD_SSH_HOST
         run: echo "PROD_SSH_HOST = ${{ secrets.PROD_SSH_HOST }}"
-
-      - name: deploy-production
-        id: prod-ssh
+      - id: prod-ssh
+        name: deploy-production
+        
         if: success() #前のステップ(cypressテスト)成功時のみ実行
         uses: invi5H/ssh-action@v1
         with:
