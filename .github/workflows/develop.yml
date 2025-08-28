@@ -55,6 +55,9 @@ jobs:
             cd /app/ryuya_yoshida &&
             bash deploy.sh ryuya_yoshida
           "
+      - name: Debug PROD_SSH_HOST
+        run: echo "PROD_SSH_HOST = ${{ secrets.PROD_SSH_HOST }}"
+
       - name: deploy-production
         id: prod-ssh
         if: success() #前のステップ(cypressテスト)成功時のみ実行
