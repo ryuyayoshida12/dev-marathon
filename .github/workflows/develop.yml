@@ -55,6 +55,7 @@ jobs:
             cd /app/ryuya_yoshida &&
             bash deploy.sh ryuya_yoshida
           "
+      - run: echo "DEV host = ${{ secrets.DEV_SSH_HOST }}"
       - name: Debug PROD_SSH_HOST
         run: echo "PROD_SSH_HOST = ${{ secrets.PROD_SSH_HOST }}"
       - id: prod-ssh
