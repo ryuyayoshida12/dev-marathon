@@ -67,15 +67,6 @@ jobs:
           SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
           SSH_USER: ${{ secrets.PROD_SSH_USER }}
           SSH_KEY: ${{ secrets.PROD_SSHE_SSH_KEY }}
-          SCRIPT: |
-            export SESSION_SECRET='${{ secrets.SESSION_SECRET }}'
-            export POSTGRES_USER='${{ secrets.POSTGRES_USER }}'
-            export POSTGRES_DB='${{ secrets.POSTGRES_DB }}'
-            export POSTGRES_HOST='${{ secrets.POSTGRES_HOST }}'
-            export POSTGRES_PASSWORD='${{ secrets.PROD_POSTGRES_PASSWORD }}'
-            cd /app/ryuya_yoshida
-            bash deploy.sh ryuya_yoshida
-
       - run: echo "prod server = ${{ steps.prod-ssh.outputs.SERVER }}"
         if: always()
       # - run: |
