@@ -56,7 +56,8 @@ jobs:
          ssh-private-key: ${{ secrets.PROD_SSHE_SSH_KEY }}
       - name: Run deploy script
         run: |
-         ssh ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }} "
+         ssh -o StrictHostKeyChecking=no \
+          ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }} "
           cd /app/${{ secrets.PROD_SSH_USER }} &&
           bash deploy.sh ${{ secrets.PROD_SSH_USER }}
          "
